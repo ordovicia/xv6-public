@@ -15,6 +15,9 @@ struct cpu cpus[NCPU];
 int ismp;
 int ncpu;
 uchar ioapicid;
+int rebootable;
+ushort reboot_port;
+uchar reboot_data;
 
 static uchar
 sum(uchar *addr, int len)
@@ -136,6 +139,9 @@ mpinit(void)
   struct xsdt *xsdt;
   struct rsdt *rsdt;
   struct madt *madt;
+  struct FADT *fadt;
+  int madt_found = 0;
+  int fadt_found = 0;
 
   // x2APIC
   asm volatile("cpuid;" : "=c"(feature) : "a"(1), "c"(0));
@@ -202,9 +208,11 @@ mpinit(void)
       cprintf("sum: %d\n", sum((uchar*)rsdt, rsdt->header.length));
       if (memcmp(rsdt->header.signature, "RSDT", 4) == 0 && sum((uchar*)rsdt, rsdt->header.length) == 0) {
         cprintf("RSDT is valid!\n");
-        for (p=(uchar*)rsdt->table, e=(uchar*)rsdt+rsdt->header.length; p<e; p+=4) {
+        for (p=(uchar*)rsdt->table, e=(uchar*)rsdt+rsdt->header.length; p<e; p+=4) {  // scan RSDT for MADT and FADT
           madt = *(struct madt**)p;
+          fadt = *(struct FADT**)p;
           if (memcmp(madt->header.signature, "APIC", 4) == 0 && sum((uchar*)madt, madt->header.length) == 0) {
+            madt_found = 1;
             for (pp=(uchar*)madt->table, ee=(uchar*)madt+madt->header.length; pp<ee; pp+=((struct madte*)pp)->length) {
               if (((struct madte*)pp)->type == 0) {
                 cprintf("MADT: type: %d (ACPI processor ID: %d, APIC ID: %d, flags: %d)\n",
@@ -221,10 +229,18 @@ mpinit(void)
                 cprintf("MADT: type: %d\n", ((struct madte*)pp)->type);
               }
             }
-            break;
+          } else if (memcmp(fadt->h.Signature, "FACP", 4) == 0 && sum((uchar*)fadt, fadt->h.Length) == 0) {
+            fadt_found = 1;
+            rebootable =
+                    fadt->h.Revision >= 2 &&
+                    fadt->Flags & (1 << 10) &&
+                    fadt->ResetReg.AddressSpace == 1;
+            reboot_port = fadt->ResetReg.Address;
+            reboot_data = fadt->ResetValue;
           }
         }
-        if (p>=e) cprintf("MADT not found\n");
+        if (!madt_found) cprintf("MADT not found\n");
+        if (!fadt_found) cprintf("FADT not found\n");
       } else {
         cprintf("RSDT is invalid!\n");
       }

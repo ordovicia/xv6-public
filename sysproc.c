@@ -89,3 +89,14 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_reboot(void)
+{
+  if (rebootable) {
+    outb(reboot_port, reboot_data);
+    return 0;
+  } else {
+    return -1;
+  }
+}

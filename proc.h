@@ -15,6 +15,9 @@ struct cpu {
 
 extern struct cpu cpus[NCPU];
 extern int ncpu;
+extern int rebootable;
+extern ushort reboot_port;
+extern uchar reboot_data;
 
 // Per-CPU variables, holding pointers to the
 // current cpu and to the current process.
