@@ -11,6 +11,54 @@ struct mp {             // floating pointer
   uchar reserved[3];
 };
 
+struct rsdp {
+  uchar signature[8];
+  uchar checksum;
+  uchar oemid[6];
+  uchar revision;
+  uint rsdtaddress;
+  // since version 2.0
+  uint length;
+  uint xsdtaddress[2];
+  uchar extendedchecksum;
+  uchar reserved[3];
+};
+
+struct acpisdthdr {
+  uchar signature[4];
+  uint length;
+  uchar revision;
+  uchar checksum;
+  uchar oemid[6];
+  uchar oemtableid[8];
+  uint oemrevision;
+  uint creatorid;
+  uint creatorrevision;
+};
+
+struct xsdt {
+  struct acpisdthdr header;
+  uint table[0][2];
+};
+
+struct rsdt {
+  struct acpisdthdr header;
+  uint table[0];
+};
+
+struct madt {
+  struct acpisdthdr header;
+  uint lca;
+  uint flags;
+  struct madte {
+    uchar type;
+    uchar length;
+    uchar acpiprocessorid;  // for local APIC
+    uchar apicid;           // for local APIC
+    uint flags;             // for local APIC
+  } table[0];
+};
+
 struct mpconf {         // configuration table header
   uchar signature[4];           // "PCMP"
   ushort length;                // total table length
