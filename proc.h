@@ -1,3 +1,5 @@
+#pragma once
+
 // Per-CPU state
 struct cpu {
     uchar apicid;               // Local APIC ID
