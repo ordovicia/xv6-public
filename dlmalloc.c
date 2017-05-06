@@ -888,6 +888,8 @@ DLMALLOC_EXPORT void* dlmalloc(size_t);
 */
 DLMALLOC_EXPORT void  dlfree(void*);
 
+#if 0 // 1444
+
 /*
   calloc(size_t n_elements, size_t element_size);
   Returns a pointer to n_elements * element_size bytes, with all locations
@@ -1438,6 +1440,8 @@ DLMALLOC_EXPORT int mspace_trim(mspace msp, size_t pad);
 DLMALLOC_EXPORT int mspace_mallopt(int, int);
 
 #endif /* MSPACES */
+
+#endif // 891
 
 #ifdef __cplusplus
 }  /* end of extern "C" */
@@ -3209,6 +3213,8 @@ static int init_mparams(void) {
   return 1;
 }
 
+#if 0 // 3242
+
 /* support for mallopt */
 static int change_mparam(int param_number, int value) {
   size_t val;
@@ -3232,6 +3238,8 @@ static int change_mparam(int param_number, int value) {
     return 0;
   }
 }
+
+#endif // 3216
 
 #if DEBUG
 /* ------------------------- Debugging Support --------------------------- */
@@ -3875,6 +3883,8 @@ static void* mmap_alloc(mstate m, size_t nb) {
   return 0;
 }
 
+#if 0 // 3923
+
 /* Realloc using mmap */
 static mchunkptr mmap_resize(mstate m, mchunkptr oldp, size_t nb, int flags) {
   size_t oldsize = chunksize(oldp);
@@ -3910,6 +3920,7 @@ static mchunkptr mmap_resize(mstate m, mchunkptr oldp, size_t nb, int flags) {
   return 0;
 }
 
+#endif // 3886
 
 /* -------------------------- mspace management -------------------------- */
 
@@ -4378,6 +4389,8 @@ static int sys_trim(mstate m, size_t pad) {
   return (released != 0)? 1 : 0;
 }
 
+#if 0 // 4465
+
 /* Consolidate and bin a chunk. Differs from exported versions
    of free mainly in that the chunk need not be marked as inuse.
 */
@@ -4448,6 +4461,8 @@ static void dispose_chunk(mstate m, mchunkptr p, size_t psize) {
     CORRUPTION_ERROR_ACTION(m);
   }
 }
+
+#endif // 4392
 
 /* ---------------------------- malloc --------------------------- */
 
@@ -4825,6 +4840,8 @@ void* dlcalloc(size_t n_elements, size_t elem_size) {
 }
 
 #endif /* !ONLY_MSPACES */
+
+#if 0 // 6002
 
 /* ------------ Internal support for realloc, memalign, etc -------------- */
 
@@ -5992,6 +6009,8 @@ int mspace_mallopt(int param_number, int value) {
 }
 
 #endif /* MSPACES */
+
+#endif // 4833
 
 
 /* -------------------- Alternative MORECORE functions ------------------- */
