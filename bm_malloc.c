@@ -17,7 +17,7 @@
 #include "user.h"
 
 #define TEST_NUM (1 << 5)
-#define ALLOC_NUM_LOG2 22
+#define ALLOC_NUM_LOG2 16
 
 #define ALLOC_SIZE 16
 
@@ -55,32 +55,32 @@ int main(void)
                                                                 \
     for (t = 0; t < TEST_NUM; t++) {                            \
         ptrs[0] = ALLOC(2 * ALLOC_SIZE);                        \
-        for (i = 1; i < ALLOC_NUM; i++)                         \
+        for (i = 1; i < (ALLOC_NUM); i++)                       \
             ptrs[i] = ALLOC(ALLOC_SIZE);                        \
-        for (i = 0; i < ALLOC_NUM; i += 2)                      \
+        for (i = 0; i < (ALLOC_NUM); i += 2)                    \
             FREE(ptrs[i]);                                      \
                                                                 \
         start_ticks = rdtsc();                                  \
         ptrs[0] = ALLOC(2 * ALLOC_SIZE);                        \
         TICKS_END_UPDATE(malloc_ave_ticks, malloc_worst_ticks); \
                                                                 \
-        FREE(ptrs[ALLOC_NUM - 1]);                              \
+        FREE(ptrs[(ALLOC_NUM)-1]);                              \
         start_ticks = rdtsc();                                  \
         FREE(ptrs[0]);                                          \
         TICKS_END_UPDATE(free_ave_ticks, free_worst_ticks);     \
                                                                 \
-        for (i = 1; i < ALLOC_NUM - 1; i += 2)                  \
+        for (i = 1; i < (ALLOC_NUM)-1; i += 2)                  \
             FREE(ptrs[i]);                                      \
     }                                                           \
                                                                 \
     printf(1, "%d %d %d %d ",                                   \
-        malloc_ave_ticks, malloc_worst_ticks,                   \
-        free_ave_ticks, free_worst_ticks)
+        malloc_ave_ticks / TEST_NUM, malloc_worst_ticks,        \
+        free_ave_ticks / TEST_NUM, free_worst_ticks)
 
     for (a = 8; a <= ALLOC_NUM_LOG2; a++) {
         printf(1, "%d ", a);
-        RUN((1 << a), malloc, free);
-        RUN((1 << a), dlmalloc, dlfree);
+        RUN(1 << a, malloc, free);
+        RUN(1 << a, dlmalloc, dlfree);
         printf(1, "\n");
     }
 
