@@ -23,11 +23,19 @@
 
 void* ptrs[1 << ALLOC_NUM_LOG2];
 
+static inline uint64_t rdtsc(void)
+{
+    uint64_t x;
+    asm volatile(".byte 0x0f, 0x31"
+                 : "=A"(x));
+    return x;
+}
+
 int main(void)
 {
     int a, t, i;
-    int start_ticks, end_ticks, ticks;
-    int malloc_ave_ticks, malloc_worst_ticks;
+    uint64_t start_ticks, end_ticks;
+    int ticks, malloc_ave_ticks, malloc_worst_ticks;
     int free_ave_ticks, free_worst_ticks;
 
     printf(1,
@@ -35,10 +43,10 @@ int main(void)
 
 #define max(x, y) (x > y ? x : y)
 
-#define TICKS_END_UPDATE(AVE, WORST) \
-    end_ticks = uptime();            \
-    ticks = end_ticks - start_ticks; \
-    AVE += ticks;                    \
+#define TICKS_END_UPDATE(AVE, WORST)        \
+    end_ticks = rdtsc();                    \
+    ticks = (int)(end_ticks - start_ticks); \
+    AVE += ticks;                           \
     WORST = max(WORST, ticks)
 
 #define RUN(ALLOC_NUM, ALLOC, FREE)                             \
@@ -52,12 +60,12 @@ int main(void)
         for (i = 0; i < ALLOC_NUM; i += 2)                      \
             FREE(ptrs[i]);                                      \
                                                                 \
-        start_ticks = uptime();                                 \
+        start_ticks = rdtsc();                                  \
         ptrs[0] = ALLOC(2 * ALLOC_SIZE);                        \
         TICKS_END_UPDATE(malloc_ave_ticks, malloc_worst_ticks); \
                                                                 \
         FREE(ptrs[ALLOC_NUM - 1]);                              \
-        start_ticks = uptime();                                 \
+        start_ticks = rdtsc();                                  \
         FREE(ptrs[0]);                                          \
         TICKS_END_UPDATE(free_ave_ticks, free_worst_ticks);     \
                                                                 \
